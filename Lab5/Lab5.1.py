@@ -8,12 +8,16 @@ class Student:
         self.student_id = student_id
         self.first_name = first_name
         self.last_name = last_name
-        self.grades = grades if grades is not None else []
+        self.grades = []
+        for grade in grades or []:
+            self.add_grade(grade)
 
     def add_grade(self, grade: int):
+        if not 1 <= grade <= 5:
+            raise ValueError("Grade must be between 1 and 5")
         self.grades.append(grade)
 
-    def get_average(self):
+    def get_average(self) -> float:
         if not self.grades:
             return 0.0
         return sum(self.grades) / len(self.grades)
@@ -26,15 +30,16 @@ class Student:
 class Group:
 
     def __init__(self,
-                 name: str = "group"):
+                 name: str = "Unnamed group"):
         self.name = name
         self.students = []
 
-    def add_student(self, student):
+    def add_student(self, student: Student) -> None:
         for item in self.students:
             if item.student_id == student.student_id:
-                print(f"Студент з id {student.student_id} вже є в групі.")
-                return
+                raise ValueError(
+                    f"Student with ID {student.student_id} already exists"
+                )
         self.students.append(student)
 
     def remove_student(self, student_id: int):
@@ -43,9 +48,9 @@ class Group:
                 self.students.remove(item)
                 print(f"Студента {item.last_name} {item.first_name} видалено.")
                 return
-        print(f"Студента з id {student_id} не знайдено.")
+        raise ValueError(f"Student with ID {student_id} not found")
 
-    def print_rating(self):
+    def print_rating(self) -> None:
         print(f"\nРейтинг групи {self.name}:")
         if not self.students:
             print("\tГрупа порожня.")
@@ -77,8 +82,11 @@ def main():
     group.print_rating()
 
     print("\nВидаляємо студента з id 4:")
-    group.remove_student(4)
-    group.remove_student(10)
+    try:
+        group.remove_student(4)
+        group.remove_student(10)
+    except ValueError as error:
+        print(error)
 
     group.print_rating()
 
